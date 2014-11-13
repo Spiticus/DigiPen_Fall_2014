@@ -33,14 +33,36 @@ package Engine
 		private var uiParticlesCount:uint;
 		//Hihgly recmmomend compute HERE ONCE, and then use it many times
 		private var nEmissionDelayTimer:Number;
+		//The age of the particle system (not the particle)
+		private var nAge:Number;
 		
 		public function ParticleSystem(xmlEmitterProperties_:XML, xmlParticleProperties_:XML, uiNumberOfParticles_:uint, nLifeTime_:Number,
 									   displayobjectcontainer_:DisplayObjectContainer = null, nPosX_:Number = 0, nPosY_:Number = 0, 
 									   iCollisionType_:int = 1, iID_:int = 13 )
 		{
 			super(displayobjectcontainer_, nPosX_, nPosY_, iID_, iCollisionType_);
-			/* STUDENT CODE GOES HERE */
-			//particleinfo loaded, emitter type loaded
+			//Loading particle system properties and creating new Particle info
+			uiNumberOfParticles = uiNumberOfParticles_;
+			nLifeTime = nLifeTime_;
+			particleinfo = new ParticleInfo(xmlParticleProperties_);
+			uiParticleCount = uiNumberOfParticles_;
+			vParticles = new Vector.<Particle>;
+			
+			//Checking to see which type of emitter is being used, then loading the info for that type
+			if(xmlEmitterProperties_.Type == "Circle")
+			{
+				new EmitterCircle(nPosx_, nPosY_, xmlEmitterProperties_.EmissionRate, xmlEmitterProperties_.EmissionDelay,
+								  xmlEmitterProperties_.InnerRadius, xmlEmitterProperties_.OuterRadius,
+								  xmlEmitterProperties_.InnerAngle, xmlEmitterProperties_.OuterAngle);
+			}
+			if(xmlEmitterProperties_.Type == "Rectangle")
+			{
+				new EmitterRectangle(nPoxX_, nPosY_, xmlEmitterProperties_.EmissionRate, xmlEmitterProperites_.EmmisionDelay,
+									 xmlEmitterProperites_.InnerHalfWidth, xmlEmitterProperites_.OuterHalfWidth,
+									 xmlEmitterProperites_.InnerHalfHeight, xmlEmitterProperites_.OuterHalfHeight);
+			}
+			
+			
 		}
 		
 		final override public function Initialize():void
@@ -48,7 +70,8 @@ package Engine
 			//Wipe out Vector of partricles (because reset particle system)
 			//Cleaning up everything we need to RECEREATE
 			//Test reinitializing
-			/* STUDENT CODE GOES HERE */
+			GenerateParticles();
+			nAge = 0;
 		}
 		
 		final private function GenerateParticles()
