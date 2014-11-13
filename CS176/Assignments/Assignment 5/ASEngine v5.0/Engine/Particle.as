@@ -14,6 +14,7 @@ package Engine
 {
 	import flash.display.DisplayObject;
 	import flash.geom.Point;
+	import Engine.PhysicsManager;
 	
 	final internal class Particle extends GameObject
 	{
@@ -27,56 +28,61 @@ package Engine
 		//resets it before it actually dies (unless particle system actually dies i.e. 2 frames where this
 		//flag is true)
 		public var bShouldReset:Boolean;
-		private var nAge:Number;
 	
-		public function Particle(displayobject_:DisplayObject, particleinfo_:ParticleInfo, iCollisionType_:int = 0, iID_:int = 14, nAge_:Number )
+		public function Particle(displayobject_:DisplayObject, particleinfo_:ParticleInfo, iCollisionType_:int = 0, iID_:int = 14)
 		{
 			super(displayobject_, 0 , 0, iID_, iCollisionType_);
-			nAge = nAge_;
 			particleinfo = particleinfo_;
 			
 			//Every time i crate a particle then i have to enable physics and set its mass
-			
-			//Linear interpolation over lifetime for opacity and scale (1/30 DT)
-			//EXAMPLE: Opacities: 0.2 - 0.7 ; Lifetime: 1 second ; DT = 1/30 (thus particle stays 30 frames on screen)
-			//EXAMPLE: (1 / 1/30) = 30 ; *** (0.7 - 0.2) / 30 =  0.5/30 ***
 			
 			
 		}
 
 		final override public function Initialize():void
 		{
+			//Getting values for opacity
 			var endOpacity:Number = HelperFunctions.GetRandom(particleinfo.nLowerEndOpacity, particleinfo.nUpperEndOpacity);
 			var startOpacity:Number = HelperFunctions.GetRandom(particleinfo.nLowerStartOpacity, particleinfo.nUpperStartOpacity);
 			
-			//HERE, compute the nDeltaOpacity and pDeltaScale so that particles don't always have the same values
-			//See notes in the constructor. nDeltaOpacity = particleinfo_.endopacity - particleinfo_.startopacity / 30
-			//DT is a constant in physicsmanager.DT
+			//Getting values for scale
+			var endScaleX:Number = HelperFunctions.GetRandom(particleinfo.nLowerEndScaleX, particleinfo.nUpperEndScaleX);
+			var endScaleY:Number = HelperFunctions.GetRandom(particleinfo.nLowerEndScaleY, particleinfo.nUpperEndScaleY);
+			var startScaleX:Number = HelperFunctions.GetRandom(particleinfo.nLowerStartScaleX, particleinfo.nUpperStartScaleX);
+			var startScaleY:Number = HelperFunctions.GetRandom(particleinfo.nLowerStartScaleY, particleinfo.nUpperStartScaleY);
 			
-			nDeltaOpacity = endOpacity - startOpacity;
+			//Getting value for lifeTime
+			var lifeTime:Number = HelperFunctions.GetRandom(particleinfo.nLowerLifetime, particleinfo.nUpperLifetime);
 			
-			//Reset particle lifetime from particleinfo here (it will decrement)
-			/* STUDENT CODE GOES HERE */
+			//Updating Opacity and Scale
+			nDeltaOpacity = (endOpacity - startOpacity) / PhysicsManager.DT;
+			pDeltaScale.x =(endScaleX - startScaleX) / PhysicsManager.DT;
+			pDeltaScale.y = (endScaleY - startScaleY) / PhysicsManager.DT;
+			
+			nLifeTime -= lifeTime;
+			
 		}
 		
 		final override public function Update():void
 		{ 
 			//Scale, Opacity --- Forces
-			//Lifetime; if lifetime is 0, zet bShouldReset to true; then bIsDead if bIsReset is still true next frame
-			//bIsReset is true, go to the next frame. then next frame, if still true, then die
-			//Could use a simple counter?? NO FOOL, LOOK BELOW!!!
-			//if(bReset == true)
-			//{bDead = true;}
-			//This setup allows a frame to pass without using a counter.
-			//if(lifetime <= 0)
-			//{bRest = true}
 			
-			if(particleinfo.nLifeTime >= nLifetime)
+			//Checking if the boolean for reset has lasted longer than a frame...
+			if(bShouldReset == true)
+			{
+				//if so, set it's dead boolean to true.
+				bIsDead = true;
+			}
+			
+			nDeltaOpacity += nDeltaOpacity;
+			pDeltaScale += pDeltaScale;
+			nLifeTime -= PhysicsManager.DT;
+			
+			if(nLifeTime <= 0)
 			{
 				bShouldReset = true;
 			}
 			
-			/* STUDENT CODE GOES HERE */
 		}
 		
 		final override public function Destroy():void
