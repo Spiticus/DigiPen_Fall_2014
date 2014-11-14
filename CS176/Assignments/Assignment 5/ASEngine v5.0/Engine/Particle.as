@@ -15,10 +15,11 @@ package Engine
 	import flash.display.DisplayObject;
 	import flash.geom.Point;
 	import Engine.PhysicsManager;
+	import Engine.*;
 	
 	final internal class Particle extends GameObject
 	{
-		private var  particleinfo:ParticleInfo
+		private var particleinfo:ParticleInfo
 		private var nLifeTime:Number;
 		//Computed according to data in XML
 		private var nDeltaOpacity:Number;
@@ -33,33 +34,41 @@ package Engine
 		{
 			super(displayobject_, 0 , 0, iID_, iCollisionType_);
 			particleinfo = particleinfo_;
-			
-			//Every time i crate a particle then i have to enable physics and set its mass
-			
-			
+			bIsDead = false;
+			bShouldReset = false;
+			pDeltaScale = new Point();
+			EnablePhysics();
+			SetPhysicsProperties(particleinfo.nMass, new Point(), 0);
 		}
 
 		final override public function Initialize():void
 		{
+			displayobject.x = 100;
+			displayobject.y = 100;
+			
+			//Getting value for lifeTime
+			nLifeTime = HelperFunctions.GetRandom(particleinfo.nLowerLifetime, particleinfo.nUpperLifetime);
+			
+			var iNumberOfFrames:int = nLifeTime / PhysicsManager.DT;
+			
 			//Getting values for opacity
 			var endOpacity:Number = HelperFunctions.GetRandom(particleinfo.nLowerEndOpacity, particleinfo.nUpperEndOpacity);
 			var startOpacity:Number = HelperFunctions.GetRandom(particleinfo.nLowerStartOpacity, particleinfo.nUpperStartOpacity);
+			displayobject.alpha = startOpacity;
 			
 			//Getting values for scale
 			var endScaleX:Number = HelperFunctions.GetRandom(particleinfo.nLowerEndScaleX, particleinfo.nUpperEndScaleX);
 			var endScaleY:Number = HelperFunctions.GetRandom(particleinfo.nLowerEndScaleY, particleinfo.nUpperEndScaleY);
 			var startScaleX:Number = HelperFunctions.GetRandom(particleinfo.nLowerStartScaleX, particleinfo.nUpperStartScaleX);
 			var startScaleY:Number = HelperFunctions.GetRandom(particleinfo.nLowerStartScaleY, particleinfo.nUpperStartScaleY);
+			displayobject.scaleX = startScaleX;
+			displayobject.scaleY = startScaleY;
 			
-			//Getting value for lifeTime
-			var lifeTime:Number = HelperFunctions.GetRandom(particleinfo.nLowerLifetime, particleinfo.nUpperLifetime);
+			//Setting Opacity and Scale
+			nDeltaOpacity = (endOpacity - startOpacity) / iNumberOfFrames;
+			pDeltaScale.x =(endScaleX - startScaleX) / iNumberOfFrames;
+			pDeltaScale.y = (endScaleY - startScaleY) / iNumberOfFrames;
 			
-			//Updating Opacity and Scale
-			nDeltaOpacity = (endOpacity - startOpacity) / PhysicsManager.DT;
-			pDeltaScale.x =(endScaleX - startScaleX) / PhysicsManager.DT;
-			pDeltaScale.y = (endScaleY - startScaleY) / PhysicsManager.DT;
-			
-			nLifeTime -= lifeTime;
 			
 		}
 		
@@ -74,8 +83,10 @@ package Engine
 				bIsDead = true;
 			}
 			
-			nDeltaOpacity += nDeltaOpacity;
-			pDeltaScale += pDeltaScale;
+			//Updating the Opacity and Scale
+			displayobject.alpha += nDeltaOpacity;
+			displayobject.scaleX += pDeltaScale.x;
+			displayobject.scaleY += pDeltaScale.y;
 			nLifeTime -= PhysicsManager.DT;
 			
 			if(nLifeTime <= 0)
@@ -87,7 +98,7 @@ package Engine
 		
 		final override public function Destroy():void
 		{
-			/* STUDENT CODE GOES HERE */
+			//super.Destroy();
 		}
 	}
 }

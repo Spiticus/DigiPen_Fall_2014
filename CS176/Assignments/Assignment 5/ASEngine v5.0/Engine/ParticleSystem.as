@@ -77,8 +77,9 @@ package Engine
 			//Takes delay, etc.. everything
 			for(var i:int = 0; i < uiNumberOfParticles; ++i)
 			{
-				ObjectManager.AddObject(new Particle(new particleinfo.particleClassReference(), particleinfo),
-										particleinfo.sName, ObjectManager.OM_DYNAMICOBJECT);
+				var particle = new Particle(new particleinfo.particleClassReference(), particleinfo);
+				vParticles.push(particle);
+				ObjectManager.AddObject(particle, particleinfo.sName, ObjectManager.OM_DYNAMICOBJECT);
 				uiParticlesCount++;
 			}
 		}
@@ -86,25 +87,35 @@ package Engine
 		final private function ResetParticle(iIndex:int)
 		{
 			//Reseting ONE particle only (iIndex = the particle number to reset)
-			/* STUDENT CODE GOES HERE */
+			
+			vParticles[iIndex].Initialize();
 		}
 		
 		final override public function Update():void
 		{
 			//Making sure it loops through the particles and see if some shoudl be reset.
 			//Check boolean, then CALL the FUNCTION to RESET
-			/* STUDENT CODE GOES HERE */
+			for(var i:int = 0; i < vParticles.length; ++i)
+			{
+				if(vParticles[i].bShouldReset == true)
+				{
+					ResetParticle(i);
+				}
+			}
 		}
 		
 		final override public function Uninitialize():void
 		{
-			/* STUDENT CODE GOES HERE */
+			for(var i:int = 0; i < vParticles.length; ++i)
+			{
+				delete vParticles[i];
+			}
+			vParticles = null;
 		}
 				
 		final override public function Destroy():void
 		{
 			super.Destroy();
-			/* STUDENT CODE GOES HERE */
 		}
 	}
 
