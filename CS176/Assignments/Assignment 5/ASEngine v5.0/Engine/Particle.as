@@ -1,12 +1,13 @@
 ﻿/***************************************************************************************/
 /*
 	filename   	Particle.as 
-	author		Elie Abi Chahine
-	email   	eabichahine@digipen.edu
-	date		24/05/2011 
+	author		Elie Abi Chahine and Jason Clark
+	email   	eabichahine@digipen.edu / jason.w@digipen.edu
+	date		24/11/2014 
 	
-	brief:
-	
+	brief: This class is responsible for the particles themselevs. Specifically, it
+	initializes  and sets the various variables with values passed in from an XML as
+	well as updating those values.	
 
 */        	 
 /***************************************************************************************/
@@ -29,22 +30,56 @@ package Engine
 		//resets it before it actually dies (unless particle system actually dies i.e. 2 frames where this
 		//flag is true)
 		public var bShouldReset:Boolean;
-	
+		
+		/*******************************************************************************/
+		/*
+			Description:
+				This method is the Constructor. It is responsible for initializing
+				all the Particle's variables. It also enables phyiscs for particles.				
+			
+			Parameters:
+				- displayobject_: can be any kind of display object or display container
+				- particleinfo_: The object's particle values
+				- iCollisionType_: The object's collision type for collsion
+				- iID_: the object's ID
+				
+			Return:
+				- None
+		*/
+		/*******************************************************************************/
 		public function Particle(displayobject_:DisplayObject, particleinfo_:ParticleInfo, iCollisionType_:int = 0, iID_:int = 14)
 		{
 			super(displayobject_, 0 , 0, iID_, iCollisionType_);
 			particleinfo = particleinfo_;
-			bIsDead = false;
-			bShouldReset = false;
 			pDeltaScale = new Point();
-			EnablePhysics();
-			SetPhysicsProperties(particleinfo.nMass, new Point(), 0);
+			EnablePhysics();			
 		}
-
+		
+		/**************************************************************************
+		/*
+			Description:
+				This method initializes the Particle by creating or 
+				initializing the needed variables.
+				
+			Parameters:
+				- None
+				
+			Return:
+				- None
+		*/
+		/*************************************************************************/
 		final override public function Initialize():void
 		{
-			displayobject.x = 100;
-			displayobject.y = 100;
+			bIsDead = false;
+			bShouldReset = false;
+			
+			SetPhysicsProperties(particleinfo.nMass, new Point(), 0);
+			
+			physicsinfo.nVelocityMagnitude = 0;
+			physicsinfo.pVelocityDirection.x = 0;
+			physicsinfo.pVelocityDirection.y = 0;
+			
+			physicsinfo.RemoveAllForces();
 			
 			//Getting value for lifeTime
 			nLifeTime = HelperFunctions.GetRandom(particleinfo.nLowerLifetime, particleinfo.nUpperLifetime);
@@ -68,14 +103,24 @@ package Engine
 			nDeltaOpacity = (endOpacity - startOpacity) / iNumberOfFrames;
 			pDeltaScale.x =(endScaleX - startScaleX) / iNumberOfFrames;
 			pDeltaScale.y = (endScaleY - startScaleY) / iNumberOfFrames;
-			
-			
 		}
 		
-		final override public function Update():void
-		{ 
-			//Scale, Opacity --- Forces
+		/*******************************************************************************/
+		/*
+			Description:
+				This method is responsible to update the particle(alpha, scale...).
+				This function will most probably be called every frame as long as the
+				particle is still alive.
 			
+			Parameters:
+				- None
+				
+			Return:
+				- None
+		*/
+		/*******************************************************************************/
+		final override public function Update():void
+		{			
 			//Checking if the boolean for reset has lasted longer than a frame...
 			if(bShouldReset == true)
 			{
@@ -93,12 +138,25 @@ package Engine
 			{
 				bShouldReset = true;
 			}
-			
 		}
 		
+		/*******************************************************************************/
+		/*
+			Description:
+				This method is responsible to destroy the particle by removing calling
+				the destroy function in GameObject and nulling particleinfo
+			
+			Parameters:
+				- None
+				
+			Return:
+				- None
+		*/
+		/*******************************************************************************/
 		final override public function Destroy():void
 		{
-			//super.Destroy();
+			super.Destroy();
+			particleinfo = null;
 		}
 	}
 }

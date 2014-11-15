@@ -6,9 +6,6 @@
 	date		10/16/2011 
 	
 	brief:
-	1st one we looked at
-	Stuff from XML put into the properties for code
-	You can make random anything here that we can make them better and better
 	
 
 */        	 
